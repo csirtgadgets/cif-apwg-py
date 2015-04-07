@@ -130,7 +130,8 @@ def main():
                 "tags": ["phishing", e["entry"]["brand"].lower()],
                 "confidence": 85,
                 "tlp": "amber",
-                "group": options["group"]
+                "group": options["group"],
+                "otype": "url"
 
             } for e in body]
 
