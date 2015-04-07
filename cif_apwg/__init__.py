@@ -131,7 +131,8 @@ def main():
                 "confidence": 85,
                 "tlp": "amber",
                 "group": options["group"],
-                "otype": "url"
+                "otype": "url",
+                "provider": "apwg.org"
 
             } for e in body]
 
