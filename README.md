@@ -9,10 +9,10 @@
   ```
   
 # Examples
-## Client
   ```bash
+  $ export APWG_TOKEN="123412341234"
   $ cif-apwg -h
-  $ cif-apwg -v --hours 12 --token 123412341234
+  $ cif-apwg -v --hours 12 --token $APWG_TOKEN
   ```
 
 # License and Copyright
