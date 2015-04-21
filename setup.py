@@ -1,10 +1,10 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('requirements.txt') as f:
     reqs = f.read().splitlines()
 
 setup(
-      name="py-cif-apwg",
+      name="py-cifapwg",
       version="0.0.0a1",
       description="APWG Feed app for CIF",
       url="https://github.com/csirtgadgets/py-cif-apwg",
@@ -19,10 +19,10 @@ setup(
       keywords=['cif', 'security', 'apwg'],
       author="Wes Young",
       author_email="wes@barely3am.com",
-      packages=["cif_apwg"],
+      packages=find_packages(),
       entry_points={
           'console_scripts': [
-              'cif-apwg=cif_apwg:main',
+              'cif-apwg=cifapwg:main',
               ]
       },
       install_requires=reqs

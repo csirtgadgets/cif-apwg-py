@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from pprint import pprint
 import json
 import requests
-from cif.sdk.client import Client as CIFClient
+from cifsdk.client import Client as CIFClient
 import yaml
 
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
@@ -45,15 +45,18 @@ def main():
 
     # apwg options
 
-    p.add_argument("--limit", dest="limit", help="limit the number of records processed [default: %(default)s",
-                   default=LIMIT)
-    p.add_argument("--apwg-token", dest="apwg_token", help="specify an APWG token", required=True)
-    p.add_argument("--format", dest="format", default="json")
-    p.add_argument("--cache", dest="cache", default=os.path.join(os.path.expanduser("~"), ".cif/apwg"))
-    p.add_argument("--apwg-remote", dest="apwg_remote", default=APWG_REMOTE)
-    p.add_argument("--past-hours", dest="past_hours", help="number of hours to go back and retrieve", default="24")
-    p.add_argument("--apwg-confidence-low", dest="apwg_confidence_low", default="85")
-    p.add_argument("--apwg-confidence-high", dest="apwg_confidence_high", default="100")
+    p.add_argument("--limit", dest="limit", help="limit the number of records processed")
+    p.add_argument("--apwg-token", help="specify an APWG token", required=True)
+    p.add_argument("--format", default="json")
+    p.add_argument("--cache", default=os.path.join(os.path.expanduser("~"), ".cif/apwg"))
+    p.add_argument("--apwg-remote",  default=APWG_REMOTE)
+    p.add_argument("--past-hours", help="number of hours to go back and retrieve", default="24")
+    p.add_argument("--apwg-confidence-low", default="85")
+    p.add_argument("--apwg-confidence-high", default="100")
+
+    p.add_argument("--dry-run", help="do not submit to CIF", action="store_true")
+
+    p.add_argument("--no-last-run", help="do not modify lastrun file", action="store_true")
 
     args = p.parse_args()
 
@@ -91,15 +94,15 @@ def main():
     logger.debug(lastrun)
     if os.path.exists(lastrun):
         with open(lastrun) as f:
-            start = f.read()
+            start = f.read().strip("\n")
     else:
         hours = int(options["past_hours"])
         start = end - timedelta(hours=hours, seconds=-1)
 
-    logger.info("start:{}".format(start))
-    logger.info("end:{}".format(end))
+    logger.info("start:{0}".format(start))
+    logger.info("end:{0}".format(end))
 
-    uri = "{}/{}/?query=date_start:{},date_end:{},format:{},confidence_low:{},confidence_high:{}".format(
+    uri = "{0}/{1}/?query=date_start:{2},date_end:{3},format:{4},confidence_low:{5},confidence_high:{6}".format(
         options["apwg_remote"],
         options["apwg_token"],
         start,
@@ -109,10 +112,10 @@ def main():
         options["apwg_confidence_high"],
     )
 
-    logger.debug("apwg url:{}".format(uri))
+    logger.debug("apwg url: {0}".format(uri))
 
     session = requests.Session()
-    session.headers['User-Agent'] = 'py-cif-apwg/0.0.0a'
+    session.headers['User-Agent'] = 'py-cifapwg/0.0.0a'
     logger.info("pulling apwg data")
     body = session.get(uri)
     body = json.loads(body.content)
@@ -120,30 +123,41 @@ def main():
 
     if len(body):
         if options.get("limit"):
-            body = body[:int(options["limit"])]
+            body = body[-int(options["limit"]):]
 
         body = [
             {
                 "observable": e["entry"]["url"].lower(),
                 "reporttime": datetime.strptime(e["entry"]["date_discovered"], "%Y-%m-%dT%H:%M:%S+0000").strftime(
                     "%Y-%m-%dT%H:%M:%SZ"),
+                "firsttime": datetime.strptime(e["entry"]["date_discovered"], "%Y-%m-%dT%H:%M:%S+0000").strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"),
+                "lasttime": datetime.strptime(e["entry"]["date_discovered"], "%Y-%m-%dT%H:%M:%S+0000").strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"),
                 "tags": ["phishing", e["entry"]["brand"].lower()],
                 "confidence": 85,
                 "tlp": "amber",
                 "group": options["group"],
                 "otype": "url",
-                "provider": "apwg.org"
+                "provider": "apwg.org",
+                "application": ["http", "https"]
 
-            } for e in body]
+            } for e in reversed(body)]
 
-        logger.info("submitting {} observables to CIF: {}".format(len(body),options["remote"]))
-        cli = CIFClient(**options)
-        ret = cli.submit(submit=json.dumps(body))
+        logger.info("start of data: {0}".format(body[len(body)-1]["reporttime"]))
+        logger.info("end of data: {0}".format(body[0]["reporttime"]))
+        if not options.get("dry_run"):
+            logger.info("submitting {0} observables to CIF: {1}".format(len(body), options["remote"]))
+            cli = CIFClient(**options)
+            ret = cli.submit(submit=json.dumps(body))
+        else:
+            logger.info("dry run, skipping submit...")
     else:
         logger.info("nothing new to submit...")
 
-    with open(os.path.join(options["cache"], "lastrun"), "w") as f:
-        f.write(str(end))
+    if not options.get("no_last_run") and not options.get("dry_run"):
+        with open(os.path.join(options["cache"], "lastrun"), "w") as f:
+            f.write(str(end))
 
 if __name__ == "__main__":
     main()

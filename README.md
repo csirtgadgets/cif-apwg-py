@@ -4,7 +4,6 @@
 ## Ubuntu
   ```bash
   $ apt-get install -y python-dev python-pip git
-  $ pip install git+https://github.com/csirtgadgets/py-cif-sdk.git
   $ pip install git+https://github.com/csirtgadgets/py-cif-apwg.git
   ```
   

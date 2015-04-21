@@ -1,2 +1,2 @@
 requests>=2.4.1
-cif-sdk
+#cifsdk>=0.0.0
