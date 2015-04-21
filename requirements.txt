@@ -1,2 +1,2 @@
 requests>=2.4.1
-cifsdk>=0.0.0a1
+py-cifsdk>=0.0.0a4
