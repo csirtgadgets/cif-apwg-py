@@ -1,2 +1,2 @@
 requests>=2.4.1
--e git+https://github.com/csirtgadgets/py-cifsdk.git@9307878d7967f12e5e9516682b7aee02d232067e#egg=py_cifsdk-develop
+cifsdk>=0.0.0a1
