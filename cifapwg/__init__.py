@@ -20,6 +20,8 @@ LIMIT = 10000000
 APWG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 CIF_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 APWG_REMOTE = "https://ecrimex.net/ubl/query"
+TLP = "red"
+CONFIDENCE = 85
 
 
 def main():
@@ -42,6 +44,7 @@ def main():
     p.add_argument("--token", dest="token", help="specify token")
     p.add_argument("--remote", dest="remote", help="specify the CIF remote")
     p.add_argument("--group", dest="group", help="specify CIF group [default: %(default)s]", default="everyone")
+    p.add_argument('--no-verify-ssl', action="store_true", default=False)
 
     # apwg options
 
@@ -53,6 +56,8 @@ def main():
     p.add_argument("--past-hours", help="number of hours to go back and retrieve", default="24")
     p.add_argument("--apwg-confidence-low", default="85")
     p.add_argument("--apwg-confidence-high", default="100")
+    p.add_argument('--tlp', default=TLP)
+    p.add_argument('--confidence', default=CONFIDENCE)
 
     p.add_argument("--dry-run", help="do not submit to CIF", action="store_true")
 
@@ -135,8 +140,8 @@ def main():
                 "lasttime": datetime.strptime(e["entry"]["date_discovered"], "%Y-%m-%dT%H:%M:%S+0000").strftime(
                     "%Y-%m-%dT%H:%M:%SZ"),
                 "tags": ["phishing", e["entry"]["brand"].lower()],
-                "confidence": 85,
-                "tlp": "amber",
+                "confidence": options["confidence"],
+                "tlp": options["tlp"],
                 "group": options["group"],
                 "otype": "url",
                 "provider": "apwg.org",
@@ -148,8 +153,8 @@ def main():
         logger.info("end of data: {0}".format(body[0]["reporttime"]))
         if not options.get("dry_run"):
             logger.info("submitting {0} observables to CIF: {1}".format(len(body), options["remote"]))
-            cli = CIFClient(**options)
-            ret = cli.submit(submit=json.dumps(body))
+            cli = CIFClient(options['token'], remote=options['remote'], no_verify_ssl=options['no_verify_ssl'])
+            ret = cli.submit(json.dumps(body))
         else:
             logger.info("dry run, skipping submit...")
     else:
