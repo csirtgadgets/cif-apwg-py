@@ -7,10 +7,10 @@ setup(
       name="py-cifapwg",
       version="0.0.0a1",
       description="APWG Feed app for CIF",
-      url="https://github.com/csirtgadgets/py-cif-apwg",
+      url="https://github.com/csirtgadgets/py-cifapwg",
       license='LGPL3',
       classifiers=[
-                   "Topic :: System :: Networking",
+                   "Topic :: Security",
                    "Environment :: Other Environment",
                    "Intended Audience :: Developers",
                    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",

@@ -1,2 +1,2 @@
 requests
-git+https://github.com/csirtgadgets/py-cifsdk.git@develop#egg=py_cifsdk
+py-cifsdk>=0.0.0a6
