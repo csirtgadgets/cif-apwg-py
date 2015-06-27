@@ -21,7 +21,7 @@ APWG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 CIF_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 APWG_REMOTE = "https://ecrimex.net/ubl/query"
 TLP = "red"
-CONFIDENCE = 85
+CONFIDENCE = 95
 
 
 def main():
@@ -54,7 +54,7 @@ def main():
     p.add_argument("--cache", default=os.path.join(os.path.expanduser("~"), ".cif/apwg"))
     p.add_argument("--apwg-remote",  default=APWG_REMOTE)
     p.add_argument("--past-hours", help="number of hours to go back and retrieve", default="24")
-    p.add_argument("--apwg-confidence-low", default="85")
+    p.add_argument("--apwg-confidence-low", default="75")
     p.add_argument("--apwg-confidence-high", default="100")
     p.add_argument('--tlp', default=TLP)
     p.add_argument('--confidence', default=CONFIDENCE)
