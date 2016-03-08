@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from pprint import pprint
 import json
 import requests
-from cifsdk.client import Client as CIFClient
+from cifsdk.client import Client
 import yaml
 
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
@@ -19,9 +19,9 @@ DEFAULT_CONFIG = ".cif.yml"
 LIMIT = 10000000
 APWG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 CIF_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-APWG_REMOTE = "https://ecrimex.net/ubl/query"
+APWG_REMOTE = "https://api.ecrimex.net/phish"
 TLP = "red"
-CONFIDENCE = 95
+CONFIDENCE = 85
 
 
 def main():
@@ -54,7 +54,7 @@ def main():
     p.add_argument("--cache", default=os.path.join(os.path.expanduser("~"), ".cif/apwg"))
     p.add_argument("--apwg-remote",  default=APWG_REMOTE)
     p.add_argument("--past-hours", help="number of hours to go back and retrieve", default="24")
-    p.add_argument("--apwg-confidence-low", default="75")
+    p.add_argument("--apwg-confidence-low", default="100")
     p.add_argument("--apwg-confidence-high", default="100")
     p.add_argument('--tlp', default=TLP)
     p.add_argument('--confidence', default=CONFIDENCE)
@@ -100,6 +100,7 @@ def main():
     if os.path.exists(lastrun):
         with open(lastrun) as f:
             start = f.read().strip("\n")
+            start = datetime.strptime(start, '%Y-%m-%d %H:%M:%S.%f')
     else:
         hours = int(options["past_hours"])
         start = end - timedelta(hours=hours, seconds=-1)
@@ -107,24 +108,22 @@ def main():
     logger.info("start:{0}".format(start))
     logger.info("end:{0}".format(end))
 
-    uri = "{0}/{1}/?query=date_start:{2},date_end:{3},format:{4},confidence_low:{5},confidence_high:{6}".format(
-        options["apwg_remote"],
+    uri = "{}?t={}&from_date={}&end_date={}&pretty_print".format(
+        options['apwg_remote'],
         options["apwg_token"],
-        start,
-        end,
-        options["format"],
-        options["apwg_confidence_low"],
-        options["apwg_confidence_high"],
+        start.strftime('%s'),
+        end.strftime('%s')
     )
 
     logger.debug("apwg url: {0}".format(uri))
 
     session = requests.Session()
-    session.headers['User-Agent'] = 'py-cifapwg/0.0.0a'
+    session.headers['User-Agent'] = 'py-cifapwg/0.0.1a'
     logger.info("pulling apwg data")
     body = session.get(uri)
     body = json.loads(body.content)
-    body = body[1:]
+
+    body = body['_embedded']['phish']
 
     if len(body):
         if options.get("limit"):
@@ -132,14 +131,11 @@ def main():
 
         body = [
             {
-                "observable": e["entry"]["url"].lower(),
-                "reporttime": datetime.strptime(e["entry"]["date_discovered"], "%Y-%m-%dT%H:%M:%S+0000").strftime(
-                    "%Y-%m-%dT%H:%M:%SZ"),
-                "firsttime": datetime.strptime(e["entry"]["date_discovered"], "%Y-%m-%dT%H:%M:%S+0000").strftime(
-                    "%Y-%m-%dT%H:%M:%SZ"),
-                "lasttime": datetime.strptime(e["entry"]["date_discovered"], "%Y-%m-%dT%H:%M:%S+0000").strftime(
-                    "%Y-%m-%dT%H:%M:%SZ"),
-                "tags": ["phishing", e["entry"]["brand"].lower()],
+                "observable": e["url"].lower(),
+                "reporttime": datetime.fromtimestamp(e["modified"]).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "firsttime": datetime.fromtimestamp(e["date_discovered"]).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "lasttime": datetime.fromtimestamp(e['date_discovered']).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "tags": ["phishing", e["brand"].lower()],
                 "confidence": options["confidence"],
                 "tlp": options["tlp"],
                 "group": options["group"],
@@ -153,9 +149,13 @@ def main():
         logger.info("end of data: {0}".format(body[0]["reporttime"]))
         if not options.get("dry_run"):
             logger.info("submitting {0} observables to CIF: {1}".format(len(body), options["remote"]))
-            cli = CIFClient(options['token'], remote=options['remote'], no_verify_ssl=options['no_verify_ssl'])
-            ret = cli.submit(json.dumps(body))
+            verify_ssl = True
+            if options['no_verify_ssl']:
+                verify_ssl = False
+            cli = Client(options['token'], remote=options['remote'], verify_ssl=verify_ssl)
+            ret = cli.submit(body)
         else:
+            pprint(body)
             logger.info("dry run, skipping submit...")
     else:
         logger.info("nothing new to submit...")
