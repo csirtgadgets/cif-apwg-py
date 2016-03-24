@@ -1,2 +1,2 @@
 https://github.com/csirtgadgets/py-cifsdk/archive/2.0.0a2.tar.gz
-requests
+requests>=2.6.0
