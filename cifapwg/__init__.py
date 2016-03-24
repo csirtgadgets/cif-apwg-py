@@ -54,7 +54,7 @@ def main():
     p.add_argument("--cache", default=os.path.join(os.path.expanduser("~"), ".cif/apwg"))
     p.add_argument("--apwg-remote",  default=APWG_REMOTE)
     p.add_argument("--past-hours", help="number of hours to go back and retrieve", default="24")
-    p.add_argument("--apwg-confidence-low", default="100")
+    p.add_argument("--apwg-confidence-low", default="65")
     p.add_argument("--apwg-confidence-high", default="100")
     p.add_argument('--tlp', default=TLP)
     p.add_argument('--confidence', default=CONFIDENCE)
@@ -108,7 +108,7 @@ def main():
     logger.info("start:{0}".format(start))
     logger.info("end:{0}".format(end))
 
-    uri = "{}?t={}&from_date={}&end_date={}&pretty_print".format(
+    uri = "{}?t={}&from_date={}&end_date={}&confidence_low=90&pretty_print".format(
         options['apwg_remote'],
         options["apwg_token"],
         start.strftime('%s'),
@@ -118,7 +118,7 @@ def main():
     logger.debug("apwg url: {0}".format(uri))
 
     session = requests.Session()
-    session.headers['User-Agent'] = 'py-cifapwg/0.0.1a'
+    session.headers['User-Agent'] = 'cif-apwg-py/0.0.2a'
     logger.info("pulling apwg data")
     body = session.get(uri)
     body = json.loads(body.content)
@@ -131,7 +131,7 @@ def main():
 
         body = [
             {
-                "observable": e["url"].lower(),
+                "observable": e["url"].lower().lstrip('3d'),
                 "reporttime": datetime.fromtimestamp(e["modified"]).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "firsttime": datetime.fromtimestamp(e["date_discovered"]).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "lasttime": datetime.fromtimestamp(e['date_discovered']).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -156,7 +156,7 @@ def main():
             ret = cli.submit(body)
         else:
             pprint(body)
-            logger.info("dry run, skipping submit...")
+            logger.info("dry run, skipping submit...{}".format(len(body)))
     else:
         logger.info("nothing new to submit...")
 

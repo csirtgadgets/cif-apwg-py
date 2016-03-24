@@ -4,10 +4,10 @@ with open('requirements.txt') as f:
     reqs = f.read().splitlines()
 
 setup(
-      name="py-cifapwg",
-      version="0.0.0a1",
+      name="cif-apwg-py",
+      version="0.0.0a2",
       description="APWG Feed app for CIF",
-      url="https://github.com/csirtgadgets/py-cifapwg",
+      url="https://github.com/csirtgadgets/cif-apwg-py",
       license='LGPL3',
       classifiers=[
                    "Topic :: Security",
@@ -20,10 +20,12 @@ setup(
       author="Wes Young",
       author_email="wes@barely3am.com",
       packages=find_packages(),
+      install_requires=[
+        'cif-sdk-py',
+      ],
       entry_points={
           'console_scripts': [
               'cif-apwg=cifapwg:main',
               ]
       },
-      install_requires=reqs
 )
