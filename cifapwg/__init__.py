@@ -108,7 +108,7 @@ def main():
     logger.info("start:{0}".format(start))
     logger.info("end:{0}".format(end))
 
-    uri = "{}?t={}&from_date={}&end_date={}&confidence_low=90&pretty_print".format(
+    uri = "{}?t={}&dd_date_start={}&dd_date_end={}&confidence_low=90&pretty_print".format(
         options['apwg_remote'],
         options["apwg_token"],
         start.strftime('%s'),
@@ -118,7 +118,7 @@ def main():
     logger.debug("apwg url: {0}".format(uri))
 
     session = requests.Session()
-    session.headers['User-Agent'] = 'cif-apwg-py/0.0.2a'
+    session.headers['User-Agent'] = 'cif-apwg-py/0.0.3a'
     logger.info("pulling apwg data")
     body = session.get(uri)
     body = json.loads(body.content)

@@ -1,1 +1,1 @@
-git+https://github.com/csirtgadgets/cif-sdk-py@da15b3db4e6462bfa330fcdb9f94e5b23b468779#egg=cif-sdk-py==2.0.0a2
+git+https://github.com/csirtgadgets/cif-sdk-py@da15b3db4e6462bfa330fcdb9f94e5b23b468779#egg=cif-sdk-py==2.0.0a5

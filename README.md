@@ -4,8 +4,8 @@
 ## Ubuntu
   ```bash
   $ apt-get install -y python-dev python-pip git python-virtualenv virtualenvwrapper
-  $ pip install git+https://github.com/csirtgadgets/py-cifsdk.git
-  $ pip install git+https://github.com/csirtgadgets/py-cifapwg.git
+  $ pip install git+https://github.com/csirtgadgets/cif-sdk-py.git
+  $ pip install git+https://github.com/csirtgadgets/cif-apwg-py.git
   ```
   
 # Examples
