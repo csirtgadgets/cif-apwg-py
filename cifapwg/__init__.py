@@ -57,6 +57,7 @@ def main():
     p.add_argument("--apwg-confidence-low", default="65")
     p.add_argument("--apwg-confidence-high", default="100")
     p.add_argument('--tlp', default=TLP)
+    p.add_argument('--altid-tlp', default=TLP)
     p.add_argument('--confidence', default=CONFIDENCE)
 
     p.add_argument("--dry-run", help="do not submit to CIF", action="store_true")
@@ -135,12 +136,14 @@ def main():
                 "reporttime": datetime.fromtimestamp(e["modified"]).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "firsttime": datetime.fromtimestamp(e["date_discovered"]).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "lasttime": datetime.fromtimestamp(e['date_discovered']).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "tags": ["phishing", e["brand"].lower()],
+                "tags": ["phishing"],
+                "description": e["brand"].lower(),
                 "confidence": options["confidence"],
                 "tlp": options["tlp"],
                 "group": options["group"],
                 "otype": "url",
                 "provider": "apwg.org",
+                "altid_tlp": options['altid_tlp'],
                 "application": ["http", "https"]
 
             } for e in reversed(body)]
