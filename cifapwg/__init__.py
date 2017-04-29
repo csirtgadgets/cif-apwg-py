@@ -20,6 +20,7 @@ LIMIT = 10000000
 APWG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 CIF_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 APWG_REMOTE = os.getenv('APWG_REMOTE')
+APWG_TOKEN = os.getenv('APWG_TOKEN')
 TLP = "red"
 CONFIDENCE = 85
 
@@ -28,6 +29,8 @@ def main():
     p = ArgumentParser(
         description=textwrap.dedent('''\
         example usage:
+            $ export APWG_REMOTE=https://api.apwg.org/endpoint
+            $ export APWG_TOKEN=123123123
             $ cif-apwg -v
         '''),
         formatter_class=RawDescriptionHelpFormatter,
@@ -49,10 +52,10 @@ def main():
     # apwg options
 
     p.add_argument("--limit", dest="limit", help="limit the number of records processed")
-    p.add_argument("--apwg-token", help="specify an APWG token", required=True)
+    p.add_argument("--apwg-token", help="specify an APWG token", required=True, default=APWG_TOKEN)
     p.add_argument("--format", default="json")
     p.add_argument("--cache", default=os.path.join(os.path.expanduser("~"), ".cif/apwg"))
-    p.add_argument("--apwg-remote",  default=APWG_REMOTE)
+    p.add_argument("--apwg-remote",  default=APWG_REMOTE, required=True)
     p.add_argument("--past-hours", help="number of hours to go back and retrieve", default="24")
     p.add_argument("--apwg-confidence-low", default="65")
     p.add_argument("--apwg-confidence-high", default="100")
