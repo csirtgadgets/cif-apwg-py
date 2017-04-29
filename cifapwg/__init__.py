@@ -19,7 +19,7 @@ DEFAULT_CONFIG = ".cif.yml"
 LIMIT = 10000000
 APWG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 CIF_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-APWG_REMOTE = "https://api.ecrimex.net/phish"
+APWG_REMOTE = os.getenv('APWG_REMOTE')
 TLP = "red"
 CONFIDENCE = 85
 
@@ -77,6 +77,10 @@ def main():
     console.setFormatter(logging.Formatter(LOG_FORMAT))
     logging.getLogger('').addHandler(console)
     logger = logging.getLogger(__name__)
+
+    if not args.apwg_remote:
+        print("\nAPWG_REMOTE missing.\nConsult with support@ecrimex.net for more information")
+        raise SystemExit
 
     options = vars(args)
 
