@@ -21,11 +21,12 @@ setup(
       author_email="wes@barely3am.org",
       packages=find_packages(),
       install_requires=[
-        'cif-sdk-py',
+        'cifsdk>=2.0.0,<3.0',
       ],
       entry_points={
           'console_scripts': [
               'cif-apwg=cifapwg:main',
+              'cif-apwg-submit=cifapwg.submit:main'
               ]
       },
 )
