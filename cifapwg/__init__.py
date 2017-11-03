@@ -116,7 +116,7 @@ def main():
     logger.info("start:{0}".format(start))
     logger.info("end:{0}".format(end))
 
-    uri = "{}?t={}&dd_date_start={}&dd_date_end={}&confidence_low=90&pretty_print".format(
+    uri = "{}?t={}&dd_date_start={}&dd_date_end={}&confidence_low=90".format(
         options['apwg_remote'],
         options["apwg_token"],
         start.strftime('%s'),
